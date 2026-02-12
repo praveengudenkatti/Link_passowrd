@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HOWLER Link Locker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #0e0e0e;
+      color: #00eaff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      background-image: radial-gradient(circle at top left, rgba(0,255,255,0.1), transparent 40%),
+                        radial-gradient(circle at bottom right, rgba(0,150,255,0.1), transparent 40%);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 15px #00eaff;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+      max-width: 400px;
+      width: 100%;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      color: #00eaff;
+      box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(90deg, #00eaff, #0077ff);
+      color: black;
+      box-shadow: 0 0 15px #00eaff;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    .hidden { display: none; }
+    .channel-btn {
+      margin-top: 20px;
+      display: inline-block;
+      padding: 12px 25px;
+      border-radius: 30px;
+      background: #25D366;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 0 20px #25D366;
+      transition: transform 0.2s;
+    }
+    .channel-btn:hover { transform: scale(1.05); }
+    footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #888;
+      text-shadow: 0 0 10px #00eaff;
+    }
+    .rotating-avatar {
+      width: 120px;
+      height: 120px;
+      margin: 20px auto;
+      border: 5px solid #00fff7;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 20px #00fff7;
+      animation: rotate 6s linear infinite;
+    }
+    .rotating-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔒 HOWLER LINK LOCKER 🔒</h1>
+  <div class="rotating-avatar">
+    <img src="https://i.ibb.co/dw1GGFVD/IMG-20250621-WA0079.jpg" alt="Profile Image">
+  </div>
+
+  <div class="container" id="setupBox">
+    <input type="text" id="targetLink" placeholder="Paste your link here">
+    <select id="lockType">
+      <option value="password">Password Lock</option>
+      <option value="channel">Channel Join Lock</option>
+    </select>
+    <input type="text" id="extraInput" placeholder="Enter password OR channel link">
+    <button onclick="generateLockedLink()">Generate Locked Link</button>
+    <p id="lockedUrl"></p>
+  </div>
+
+  <a href="https://whatsapp.com/channel/0029Vb56S8R4yltWXkgB5s1h" target="_blank" class="channel-btn">📢 Join Our WhatsApp Channel</a>
+
+  <footer>© 2025 | Developed By ⚡<strong>Night-Howler</strong>⚡</footer>
+
+  <script>
+    // 🔐 Generate Locked Link
+    function generateLockedLink() {
+      const target = document.getElementById("targetLink").value.trim();
+      const type = document.getElementById("lockType").value;
+      const extra = document.getElementById("extraInput").value.trim();
+      const lockedUrl = document.getElementById("lockedUrl");
+
+      if (!target || !extra) {
+        lockedUrl.innerHTML = "⚠️ Please fill all fields.";
+        return;
+      }
+
+      let finalLink = "";
+      if (type === "password") {
+        const encoded = btoa(extra); // Base64 encode password
+        finalLink = window.location.origin + window.location.pathname + 
+          "?type=password&link=" + encodeURIComponent(target) + 
+          "&pass=" + encodeURIComponent(encoded);
+      } else {
+        finalLink = window.location.origin + window.location.pathname + 
+          "?type=channel&link=" + encodeURIComponent(target) + 
+          "&channel=" + encodeURIComponent(extra);
+      }
+
+      lockedUrl.innerHTML = `✅ Locked Link Generated:<br><a href="${finalLink}" target="_blank">${finalLink}</a>`;
+    }
+
+    // 🔓 Unlock Logic
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type");
+      const link = params.get("link");
+      if (!type || !link) return;
+
+      document.getElementById("setupBox").classList.add("hidden");
+
+      if (type === "password") {
+        const encodedPass = params.get("pass");
+        const box = document.createElement("div");
+        box.className = "container";
+        box.innerHTML = `
+          <h2>🔑 Enter Password</h2>
+          <input type="password" id="unlockPass" placeholder="Enter Password">
+          <button onclick="checkPass('${encodedPass}','${link}')">Unlock</button>
+        `;
+        document.body.insertBefore(box, document.querySelector("footer"));
+      }
+
+      if (type === "channel") {
+        const channel = params.get("channel");
+        const box = document.createElement("div");
+        box.className = "container";
+        box.innerHTML = `
+          <h2>📢 Join Channel to Unlock</h2>
+          <a href="${channel}" target="_blank" class="channel-btn">Join Channel</a>
+          <button onclick="openLink('${link}')">✅ I Have Joined</button>
+        `;
+        document.body.insertBefore(box, document.querySelector("footer"));
+      }
+    }
+
+    // Password check
+    function checkPass(encodedPass, targetLink) {
+      const decoded = atob(encodedPass); // decode Base64
+      const inputPass = document.getElementById("unlockPass").value;
+      if (inputPass === decoded) {
+        window.location.href = targetLink;
+      } else {
+        alert("❌ Wrong Password!");
+      }
+    }
+
+    // Direct open link
+    function openLink(targetLink) {
+      window.location.href = targetLink;
+    }
+  </script>
+</body>
+</html>
